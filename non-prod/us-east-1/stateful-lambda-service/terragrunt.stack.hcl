@@ -29,10 +29,25 @@ unit "lambda_service" {
     // Optional inputs
     memory  = 128
     timeout = 3
+  }
 
-    // Dependency paths
-    role_path           = "../roles/lambda-iam-role-to-dynamodb"
-    dynamodb_table_path = "../db"
+  // Stacks dependencies wire cross-unit relationships in the stack file via unit.<name>.path
+  autoinclude {
+    dependency "role" {
+      config_path = unit.role.path
+
+      mock_outputs = {
+        arn = "arn:aws:iam::123456789012:role/lambda-iam-role-to-dynamodb"
+      }
+    }
+
+    dependency "dynamodb_table" {
+      config_path = unit.db.path
+
+      mock_outputs = {
+        name = "dynamodb-table"
+      }
+    }
   }
 }
 
@@ -75,7 +90,16 @@ unit "role" {
     version = "main"
 
     name = "${local.name}-role"
+  }
 
-    dynamodb_table_path = "../../db"
+  // Stacks dependencies wire cross-unit relationships in the stack file via unit.<name>.path
+  autoinclude {
+    dependency "dynamodb_table" {
+      config_path = unit.db.path
+
+      mock_outputs = {
+        arn = "arn:aws:dynamodb:us-east-1:123456789012:table/example-table"
+      }
+    }
   }
 }
