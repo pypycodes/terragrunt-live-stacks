@@ -338,15 +338,41 @@ unit "lambda_service" {
     // Optional inputs
     memory  = 128
     timeout = 3
+  }
 
-    // Dependency paths
-    role_path           = "../roles/lambda-iam-role-to-dynamodb"
-    dynamodb_table_path = "../db"
+  // Stacks dependencies wire cross-unit relationships in the stack file via unit.<name>.path
+  autoinclude {
+    dependency "role" {
+      config_path = unit.role.path
+
+      mock_outputs = {
+        arn = "arn:aws:iam::123456789012:role/lambda-iam-role-to-dynamodb"
+      }
+    }
+
+    dependency "dynamodb_table" {
+      config_path = unit.db.path
+
+      mock_outputs = {
+        name = "dynamodb-table"
+      }
+    }
   }
 }
 ```
 
-Here, you can see that the `values` attribute is setting exactly the values that are unique to the `lambda_service` unit in the context of the `stateful-lambda-service` stack, including the `version` of the OpenTofu module it uses, and the relative paths to the dependencies it relies on (e.g. the `db` and `role` units).
+Here, you can see that the `values` attribute is setting exactly the values that are unique to the `lambda_service` unit in the context of the `stateful-lambda-service` stack, including the `version` of the OpenTofu module it uses.
+
+### Declaring dependencies between units
+
+The `lambda_service` unit needs the IAM `role` and DynamoDB `db` units to exist before it can be deployed, and it reads their outputs at runtime. Rather than hand-writing the relative paths to those units, this repository declares the dependencies directly in the stack file using an [`autoinclude`](https://terragrunt.gruntwork.io/docs/reference/hcl/blocks/#autoinclude) block:
+
+- `config_path = unit.role.path` resolves to the generated directory of the `role` unit, so you never compute relative paths like `../roles/lambda-iam-role-to-dynamodb` by hand. If you rename or relocate a unit, the reference follows it automatically.
+- `mock_outputs` provide placeholder values so that a `plan` succeeds before the dependencies have been applied.
+
+When you run `terragrunt stack generate`, Terragrunt writes each declared dependency into a `terragrunt.autoinclude.hcl` file next to the generated unit, then merges it into that unit whenever the unit is run. As a result, the catalog units stay free of any knowledge about where their dependencies live: the `js-lambda-stateful-service` unit simply consumes `dependency.role.outputs.arn`, and the stack decides which `role` unit satisfies that dependency.
+
+This is the [stacks dependencies](https://terragrunt.gruntwork.io/docs/features/stacks/explicit/#declaring-dependencies-between-units) feature, which is enabled by default in Terragrunt `v1.1.0` and later.
 
 ## What to do with `.terraform.lock.hcl` files
 
