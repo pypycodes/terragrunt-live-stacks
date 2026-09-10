@@ -9,7 +9,7 @@ unit "lambda_service" {
   //
   // If you are using a private catalog, you may want to use an SSH source URL instead:
   // source = "git::git@github.com:acme/terragrunt-infrastructure-catalog.git//units/lambda-stateful-service"
-  source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/js-lambda-stateful-service"
+  source = "github.com/pypycodes/terragrunt-infrastructure-catalog-example//units/js-lambda-stateful-service"
 
   path = "service"
 
@@ -72,39 +72,6 @@ unit "db" {
     hash_key_type = "S"
   }
 }
-
-# unit "role" {
-#   // You'll typically want to pin this to a particular version of your catalog repo.
-#   // e.g.
-#   // source = "github.com/acme/terragrunt-infrastructure-catalog//units/lambda-iam-role-to-dynamodb?ref=v0.1.0"
-#   //
-#   // If you are using a private catalog, you may want to use an SSH source URL instead:
-#   // source = "git::git@github.com:acme/terragrunt-infrastructure-catalog.git//units/lambda-iam-role-to-dynamodb"
-#   source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/lambda-iam-role-to-dynamodb"
-
-#   path = "roles/lambda-iam-role-to-dynamodb"
-
-#   values = {
-#     // This version here is used as the version passed down to the unit
-#     // to use when fetching the OpenTofu/Terraform module.
-#     version = "main"
-
-#     name = "${local.name}-role"
-#   }
-
-
-#   // Stacks dependencies wire cross-unit relationships in the stack file via unit.<name>.path
-#   autoinclude {
-#     dependency "dynamodb_table" {
-#       config_path = unit.db.path
-
-#       mock_outputs = {
-#         arn = "arn:aws:dynamodb:us-east-1:123456789012:table/example-table"
-#       }
-#     }
-#   }
-# }
-
 
 unit "role" {
   # source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/lambda-iam-role-to-dynamodb"
