@@ -1,0 +1,1 @@
+{"errorMessage":"Failed to start Lambda container: java.net.SocketException: No such file or directory","errorType":"Lambda.InitError"}

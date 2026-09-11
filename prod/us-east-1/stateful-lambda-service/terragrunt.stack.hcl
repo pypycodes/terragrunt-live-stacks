@@ -9,8 +9,8 @@ unit "lambda_service" {
   //
   // If you are using a private catalog, you may want to use an SSH source URL instead:
   // source = "git::git@github.com:acme/terragrunt-infrastructure-catalog.git//units/lambda-stateful-service"
-  source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/js-lambda-stateful-service"
-
+  // source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/js-lambda-stateful-service"
+  source = "github.com/pypycodes/terragrunt-infrastructure-catalog-example//units/js-lambda-stateful-service"
   path = "service"
 
   values = {
@@ -29,6 +29,10 @@ unit "lambda_service" {
     // Optional inputs
     memory  = 128
     timeout = 3
+    environment_variables = {
+      DYNAMODB_TABLE = "${local.name}-db"
+    }
+    
   }
 
   // Stacks dependencies wire cross-unit relationships in the stack file via unit.<name>.path
@@ -72,6 +76,8 @@ unit "db" {
     hash_key_type = "S"
   }
 }
+
+
 
 unit "role" {
   # source = "github.com/gruntwork-io/terragrunt-infrastructure-catalog-example//units/lambda-iam-role-to-dynamodb"
